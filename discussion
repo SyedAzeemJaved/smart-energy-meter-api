@@ -1,0 +1,11 @@
+Discussion:
+
+units
+.027 watt/s - DONE
+100 + X(watt) - DONE
+
+Decided: 
+{
+    should_continue: Boolean
+}
+

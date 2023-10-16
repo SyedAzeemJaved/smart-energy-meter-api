@@ -13,14 +13,10 @@ from sqlite.crud.password import authenticate_user
 from utils import create_access_token, secret
 
 
-router = APIRouter(
-    prefix="/token",
-)
+router = APIRouter(tags=["auth"])
 
 
-@router.post(
-    "/", tags=["auth"], summary="Generate a new access token", response_model=Token
-)
+@router.post("/token", summary="Generate a new access token", response_model=Token)
 async def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
 ):
@@ -40,7 +36,4 @@ async def login_for_access_token(
         key=secret.SECRET_KEY,
         algorithm=secret.ALGORITHM,
     )
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-    }
+    return {"access_token": access_token, "token_type": "bearer", "user": user}

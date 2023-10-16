@@ -120,7 +120,7 @@ async def update_customer_user(
             raise HTTPException(
                 status_code=403, detail="Customer with same nic already exists"
             )
-    return users.update_customer_user(user=user, db_user=db_user, db_cux=db_cux, db=db)
+    return users.update_customer_user(user=user, db_user=db_user, db=db)
 
 
 @router.delete(

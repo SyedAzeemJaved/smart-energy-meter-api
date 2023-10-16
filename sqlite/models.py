@@ -12,7 +12,11 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from sqlite.database import Base, engine
-from sqlite.schemas import UserUpdateWithoutCustomer, CustomerCreateOrUpdate
+from sqlite.schemas import (
+    UserUpdateWithoutCustomer,
+    CustomerCreateOrUpdate,
+    CustomerReadingBase,
+)
 
 Base.metadata.create_all(bind=engine)
 
@@ -26,7 +30,12 @@ class User(Base):
     password = Column(String, nullable=False)
     is_admin = Column(Boolean, nullable=False, default=False)
 
-    customer = relationship("Customer", uselist=False, cascade="all,delete")
+    customer = relationship(
+        "Customer",
+        uselist=False,
+        primaryjoin="User.id == Customer.user_id",
+        cascade="all,delete",
+    )
 
     created_at = Column(
         DateTime(timezone=True), nullable=True, server_default=func.now()
@@ -44,9 +53,11 @@ class Customer(Base):
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=True)
     nic_number = Column(String, index=True, nullable=False, unique=True)
-    watts_consumed = Column(Float, nullable=False, default=0.0)
+    units_consumed = Column(Float, nullable=False, default=0.0)
     account_balance_in_rupees = Column(Integer, nullable=False)
     should_get_service = Column(Boolean, nullable=False, default=False)
+    previous_voltage_reading = Column(Float, nullable=False, default=0.0)
+    previous_current_reading = Column(Float, nullable=False, default=0.0)
 
     created_at = Column(
         DateTime(timezone=True), nullable=True, server_default=func.now()
@@ -55,3 +66,7 @@ class Customer(Base):
 
     def update(self, cux: CustomerCreateOrUpdate, **kwargs):
         self.nic_number = cux.nic_number
+
+    def update_previous_readings(self, readings: CustomerReadingBase, **kwargs):
+        self.previous_voltage_reading = readings.voltage
+        self.previous_current_reading = readings.current

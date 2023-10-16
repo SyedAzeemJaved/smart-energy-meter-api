@@ -12,7 +12,8 @@ class Secret:
     SECRET_KEY: str
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
-    PER_UNIT_COST_IN_RUPEES: int
+    PER_UNIT_COST_IN_RUPEES: float
+    PER_UNIT_PEAK_FACTOR_COST_IN_RUPEES: float
 
     def __init__(
         self,
@@ -20,11 +21,15 @@ class Secret:
         algorithm: str,
         access_token_expire_minutes: float | str,
         per_unit_cost_in_rupees,
+        per_unit_peak_factor_cost_in_rupess,
     ) -> None:
         self.SECRET_KEY = secret_key
         self.ALGORITHM = algorithm
         self.ACCESS_TOKEN_EXPIRE_MINUTES = int(access_token_expire_minutes)
         self.PER_UNIT_COST_IN_RUPEES = float(per_unit_cost_in_rupees)
+        self.PER_UNIT_PEAK_FACTOR_COST_IN_RUPEES = float(
+            per_unit_peak_factor_cost_in_rupess
+        )
 
 
 secret = Secret(
@@ -32,6 +37,9 @@ secret = Secret(
     algorithm=os.getenv("ALGORITHM"),
     access_token_expire_minutes=os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"),
     per_unit_cost_in_rupees=os.getenv("PER_UNIT_COST_IN_RUPEES"),
+    per_unit_peak_factor_cost_in_rupess=os.getenv(
+        "PER_UNIT_PEAK_FACTOR_COST_IN_RUPEES"
+    ),
 )
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -80,3 +88,20 @@ def create_access_token(
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, key=key, algorithm=algorithm)
     return encoded_jwt
+
+
+def return_per_unit_cost_depending_on_time() -> float:
+    current_time = datetime.now()
+    datetime_6pm = datetime(
+        year=current_time.year,
+        month=current_time.month,
+        day=current_time.day,
+        hour=18,
+        minute=0,
+    )
+    datetime_10pm = datetime_6pm + timedelta(hours=4)
+
+    if current_time >= datetime_6pm and current_time <= datetime_10pm:
+        return float(secret.PER_UNIT_PEAK_FACTOR_COST_IN_RUPEES)
+    else:
+        return float(secret.PER_UNIT_COST_IN_RUPEES)

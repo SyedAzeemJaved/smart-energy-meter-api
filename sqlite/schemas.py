@@ -5,6 +5,7 @@ from pydantic import BaseModel, field_validator
 class Token(BaseModel):
     access_token: str
     token_type: str
+    user: "User"
 
 
 class TokenData(BaseModel):
@@ -53,9 +54,12 @@ class CustomerCreateOrUpdate(CustomerBase):
 
 class Customer(CustomerBase):
     id: int
-    watts_consumed: float
+    units_consumed: float
     account_balance_in_rupees: float
     should_get_service: bool
+
+    previous_voltage_reading: float
+    previous_current_reading: float
 
     created_at: datetime
     updated_at: datetime | None
@@ -64,8 +68,17 @@ class Customer(CustomerBase):
         orm_mode = True
 
 
-class CustomerWattBase(BaseModel):
-    watts_consumed: float
+class CustomerReadingBase(BaseModel):
+    voltage: float
+    current: float
+    units_consumed: float
+
+    @field_validator("voltage", "current")
+    @classmethod
+    def value_validator(cls, v: float) -> float:
+        if v <= 0:
+            raise ValueError("must be a positive value")
+        return v
 
 
 class CustomerAccountBalanceBase(BaseModel):
@@ -82,6 +95,8 @@ class UserBase(BaseModel):
     def email_validator(cls, v: str) -> str:
         if " " in v:
             raise ValueError("must not contain a space")
+        if "," in v:
+            raise ValueError("must not contain any commas")
         if not "@" in v:
             raise ValueError("must be a valid email address")
         return v
@@ -133,3 +148,6 @@ class User(UserOrmBase):
 
     created_at: datetime
     updated_at: datetime | None
+
+
+Token.model_rebuild()

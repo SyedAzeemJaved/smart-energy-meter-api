@@ -137,12 +137,12 @@ async def delete_user(user_id: int, db: Session = Depends(get_db)):
 @router.post("/customer/topup/{user_id}", response_model=schemas.User)
 async def top_up_customer_account(
     user_id: int,
-    account_balance: schemas.CustomerAccountBalanceBase,
+    topup_amount: schemas.CustomerTopupAccountBalanceBase,
     db: Session = Depends(get_db),
 ):
     db_user = users.get_user_by_id(user_id=user_id, db=db)
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
     return customers.top_up_account(
-        account_balance=account_balance, db_user=db_user, db=db
+        topup_amount=topup_amount, db_user=db_user, db=db
     )

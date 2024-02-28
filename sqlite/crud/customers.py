@@ -16,18 +16,19 @@ def get_customer_by_nic_number(cux_nic: str, db: Session):
 
 
 def top_up_account(
-    account_balance: schemas.CustomerAccountBalanceBase,
+    topup_amount: schemas.CustomerTopupAccountBalanceBase,
     db_user: models.User,
     db: Session,
 ):
     previous_account_balance = db_user.customer.account_balance_in_rupees
     new_account_balance = (
-        previous_account_balance + account_balance.account_balance_in_rupees
+        previous_account_balance + topup_amount.account_balance_in_rupees
     )
 
     db_user.customer.account_balance_in_rupees = new_account_balance
     if new_account_balance > 0:
         db_user.customer.should_get_service = True
+    
     db.commit()
     return db_user
 

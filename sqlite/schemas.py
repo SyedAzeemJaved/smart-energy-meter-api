@@ -81,8 +81,15 @@ class CustomerReadingBase(BaseModel):
         return v
 
 
-class CustomerAccountBalanceBase(BaseModel):
+class CustomerTopupAccountBalanceBase(BaseModel):
     account_balance_in_rupees: float
+
+    @field_validator("account_balance_in_rupees")
+    @classmethod
+    def value_validator(cls, v: float) -> float:
+        if v < 0:
+            raise ValueError("must be greater than zero")
+        return v
 
 
 # User

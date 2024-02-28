@@ -65,7 +65,7 @@ def are_object_to_edit_and_other_object_same_by_email(
 
 def return_datetime_in_proper_format() -> datetime:
     """Returns the datetime object, in proper format which is same as database"""
-    current_timestamp = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+    current_timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
     return datetime.strptime(current_timestamp, "%Y-%m-%dT%H:%M:%S")
 
 

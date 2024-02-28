@@ -78,6 +78,8 @@ async def update_admin_user(
     db_user = users.get_user_by_id(user_id=user_id, db=db)
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
+    if not db_user.is_admin:
+        raise HTTPException(status_code=403, detail="User must be an admin")
     other_object = users.get_user_by_email(user_email=user.email, db=db)
     if other_object:
         if not are_object_to_edit_and_other_object_same_by_email(
@@ -99,6 +101,8 @@ async def update_customer_user(
     db_user = users.get_user_by_id(user_id=user_id, db=db)
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
+    if db_user.is_admin:
+        raise HTTPException(status_code=403, detail="User must be a customer")
     other_object = users.get_user_by_email(user_email=user.email, db=db)
     if other_object:
         if not are_object_to_edit_and_other_object_same_by_email(
@@ -143,6 +147,8 @@ async def top_up_customer_account(
     db_user = users.get_user_by_id(user_id=user_id, db=db)
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
+    if db_user.is_admin:
+        raise HTTPException(status_code=403, detail="User must be a customer")
     return customers.top_up_account(
         topup_amount=topup_amount, db_user=db_user, db=db
     )

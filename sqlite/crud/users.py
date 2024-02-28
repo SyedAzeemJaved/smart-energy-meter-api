@@ -49,6 +49,7 @@ def create_admin_user(user: schemas.UserAdminCreate, db: Session):
     user.password = get_password_hash(user.password)
     db_user = models.User(**user.__dict__, is_admin=True)
     db.add(db_user)
+    
     db.commit()
     db.refresh(db_user)
     return db_user
@@ -69,8 +70,8 @@ def create_customer_user(user: schemas.UserCustomerCreate, db: Session):
         previous_current_reading=0.0,
     )
     db.add(db_user)
+    
     db.commit()
-
     return db_user
 
 
@@ -78,6 +79,7 @@ def update_admin_user(
     user: schemas.UserUpdateWithoutCustomer, db_user: models.User, db: Session
 ):
     db_user.update(user)
+    
     db.commit()
     return db_user
 
@@ -90,11 +92,13 @@ def update_customer_user(
     db_user.update(user)
     db_user.customer.update(user.customer)
     db_user.customer.updated_at = return_datetime_in_proper_format()
+    
     db.commit()
     return db_user
 
 
 def delete_user(db_user: models.User, db: Session):
     db.delete(db_user)
+    
     db.commit()
     return {"detail": "Deleted successfully"}
